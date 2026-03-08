@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>С 8 Марта! 🌸</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: linear-gradient(135deg, #ffe6f2 0%, #ffccdf 100%);
+            color: #4a4a4a;
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        /* Декоративные элементы для заполнения пустот */
+        .decor { position: absolute; font-size: 4rem; opacity: 0.15; z-index: 1; pointer-events: none; }
+        .decor-1 { top: -10px; left: -10px; transform: rotate(-30deg); }
+        .decor-2 { bottom: -10px; right: -10px; transform: rotate(150deg); }
+        .decor-3 { top: 20%; right: -20px; font-size: 3rem; transform: rotate(45deg); opacity: 0.1; }
+        .decor-4 { bottom: 20%; left: -20px; font-size: 3rem; transform: rotate(-45deg); opacity: 0.1; }
+        
+        /* Экраны */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 20px; opacity: 0; pointer-events: none;
+            transition: opacity 0.6s ease-in-out; text-align: center;
+            z-index: 5;
+        }
+        .screen.active { opacity: 1; pointer-events: auto; z-index: 10; }
+
+        h1, h2 { font-family: 'Pacifico', cursive; color: #d81b60; margin-bottom: 20px; font-weight: normal; }
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; line-height: 1.3; }
+        p { font-size: 1.1rem; line-height: 1.5; margin-bottom: 30px; }
+
+        /* Кнопки */
+        .btn {
+            background: #d81b60; color: white; border: none; border-radius: 30px;
+            padding: 15px 30px; font-size: 1.1rem; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(216, 27, 96, 0.4);
+            cursor: pointer; outline: none; transition: all 0.2s;
+            font-family: 'Montserrat', sans-serif; margin-top: 10px;
+            display: inline-flex; justify-content: center; align-items: center;
+        }
+        .btn:active:not(:disabled) { transform: scale(0.95); box-shadow: 0 2px 10px rgba(216, 27, 96, 0.3); }
+        .btn:disabled { background: #e57399; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        .btn-outline {
+            background: transparent; color: #d81b60; border: 2px solid #d81b60;
+            box-shadow: none; margin-top: 20px; font-size: 0.9rem; padding: 10px 20px;
+        }
+
+        /* Эффект лепестков */
+        .petal {
+            position: absolute; top: -10%; z-index: 100;
+            font-size: 1.5rem; pointer-events: none;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg) translateX(50px); opacity: 0; }
+        }
+
+        /* Карточка генератора */
+        .wish-box {
+            background: white; border-radius: 20px; padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 320px;
+            min-height: 150px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; transition: all 0.3s;
+        }
+        .wish-text { font-size: 1.2rem; font-weight: 600; color: #d81b60; }
+
+        /* Форма даты */
+        .date-form {
+            background: white; border-radius: 20px; padding: 20px; width: 100%;
+            max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .select-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        select {
+            flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ffccdf;
+            font-family: 'Montserrat', sans-serif; font-size: 1rem;
+            background: #fffafa; color: #4a4a4a; outline: none;
+        }
+        #secret-result { margin-top: 15px; font-weight: 600; color: #d81b60; min-height: 60px; display: flex; align-items: center; justify-content: center;}
+
+        /* Лотерея (Вертикальные Карточки) */
+        .cards-container { 
+            display: flex; flex-direction: column; gap: 15px; 
+            width: 100%; max-width: 320px; margin-bottom: 20px; 
+        }
+        .flip-card {
+            background: transparent; width: 100%; height: 80px;
+            perspective: 1000px; cursor: pointer;
+        }
+        .flip-card-inner {
+            position: relative; width: 100%; height: 100%;
+            text-align: center; transition: transform 0.6s; transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center; padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .flip-card-front { background: white; font-size: 1.5rem; border: 2px dashed #ffccdf; }
+        .flip-card-back {
+            background: #d81b60; color: white; transform: rotateY(180deg);
+            font-size: 0.95rem; font-weight: 600; line-height: 1.4;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="decor decor-1">🌸</div>
+    <div class="decor decor-2">🌺</div>
+    <div class="decor decor-3">🌿</div>
+    <div class="decor decor-4">🌷</div>
+
+    <div class="screen active" id="screen-1">
+        <h1>С 8 Марта! 🌸</h1>
+        <p>У меня есть для тебя кое-что особенное в этот прекрасный весенний день...</p>
+        <button class="btn" id="btn-magic" onclick="startMagic(this)">Нажать для магии ✨</button>
+    </div>
+
+    <div class="screen" id="screen-2">
+        <h2>Весеннее предсказание</h2>
+        <div class="wish-box">
+            <div class="wish-text" id="wish-text">Нажми на кнопку ниже 👇</div>
+        </div>
+        <button class="btn" onclick="generateWish()">Получить пожелание</button>
+        <button class="btn btn-outline" id="btn-next-2" style="display: none;" onclick="nextScreen(3)">Идем дальше ➔</button>
+    </div>
+
+    <div class="screen" id="screen-3">
+        <h2>Твоя суперспособность</h2>
+        <p>Звезды знают о тебе всё. Выбери день и месяц рождения:</p>
+        <div class="date-form">
+            <div class="select-group">
+                <select id="b-day"><option value="">День</option></select>
+                <select id="b-month">
+                    <option value="">Месяц</option>
+                    <option value="1">Январь</option><option value="2">Февраль</option>
+                    <option value="3">Март</option><option value="4">Апрель</option>
+                    <option value="5">Май</option><option value="6">Июнь</option>
+                    <option value="7">Июль</option><option value="8">Август</option>
+                    <option value="9">Сентябрь</option><option value="10">Октябрь</option>
+                    <option value="11">Ноябрь</option><option value="12">Декабрь</option>
+                </select>
+            </div>
+            <button class="btn" style="width: 100%; font-size: 1rem;" onclick="revealSecret()">Узнать секрет</button>
+            <div id="secret-result"></div>
+        </div>
+        <button class="btn btn-outline" id="btn-next-3" style="display: none;" onclick="nextScreen(4)">Последний сюрприз ➔</button>
+    </div>
+
+    <div class="screen" id="screen-4">
+        <h2>Выбери цветок 🌷</h2>
+        <p>Под одним из них спрятан главный комплимент сегодняшнего дня!</p>
+        
+        <div class="cards-container">
+            <div class="flip-card" onclick="flipCard(this, 0)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">Выбрать 🌸</div>
+                    <div class="flip-card-back" id="card-back-0"></div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="flipCard(this, 1)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">Выбрать 🌺</div>
+                    <div class="flip-card-back" id="card-back-1"></div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="flipCard(this, 2)">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">Выбрать 🌷</div>
+                    <div class="flip-card-back" id="card-back-2"></div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn" id="btn-restart" style="display: none;" onclick="location.reload()">Повторить 🌼</button>
+    </div>
+
+    <script>
+        // --- Навигация ---
+        function nextScreen(num) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-' + num).classList.add('active');
+        }
+
+        // --- Экран 1: Магия ---
+        function startMagic(btn) {
+            btn.innerText = "Происходит магия 🌈";
+            btn.disabled = true; // Делаем неактивной
+            createPetals();
+            setTimeout(() => { nextScreen(2); }, 2500); 
+        }
+
+        function createPetals() {
+            const symbols = ['🌸', '🌺', '✨', '🤍'];
+            for (let i = 0; i < 40; i++) {
+                let petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.animationDuration = (Math.random() * 3 + 2) + 's'; 
+                petal.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+                document.body.appendChild(petal);
+                setTimeout(() => { petal.remove(); }, 5000);
+            }
+        }
+
+        // --- Экран 2: Пожелания ---
+        const wishes = [
+            "Ты вдохновляешь окружающих!",
+            "Твоя улыбка делает этот мир светлее ✨",
+            "Этой весной тебя ждет грандиозный успех!",
+            "Ты невероятно талантливая и красивая 🌸",
+            "Пусть каждый день приносит маленькое чудо!",
+            "Оставайся такой же искренней и настоящей!",
+            "Сегодня официально можно есть сладкое без угрызений совести 🍰"
+        ];
+        function generateWish() {
+            const textElement = document.getElementById('wish-text');
+            textElement.style.opacity = 0;
+            setTimeout(() => {
+                const random = Math.floor(Math.random() * wishes.length);
+                textElement.innerText = wishes[random];
+                textElement.style.opacity = 1;
+                // Показываем кнопку перехода дальше
+                document.getElementById('btn-next-2').style.display = 'inline-block';
+            }, 300);
+        }
+
+        // --- Экран 3: Секрет даты ---
+        const daySelect = document.getElementById('b-day');
+        for (let i = 1; i <= 31; i++) {
+            let opt = document.createElement('option');
+            opt.value = i; opt.innerHTML = i;
+            daySelect.appendChild(opt);
+        }
+
+        const superpowers = [
+            "Умеешь находить красоту в самых простых вещах.",
+            "Обладаешь магнетизмом, который притягивает хороших людей.",
+            "Твоя интуиция работает лучше любого радара.",
+            "Можешь поднять настроение одним только взглядом.",
+            "В тебе скрыт неиссякаемый источник энергии и идей!",
+            "Ты мастерски умеешь превращать мечты в реальность."
+        ];
+
+        function revealSecret() {
+            const day = document.getElementById('b-day').value;
+            const month = document.getElementById('b-month').value;
+            const res = document.getElementById('secret-result');
+            
+            if(!day || !month) {
+                res.innerText = "Пожалуйста, выбери день и месяц 🌸";
+                return;
+            }
+            
+            const magicIndex = (parseInt(day) + parseInt(month)) % superpowers.length;
+            res.style.opacity = 0;
+            setTimeout(() => {
+                res.innerText = "✨ Твоя суперсила: " + superpowers[magicIndex];
+                res.style.opacity = 1;
+                // Показываем кнопку перехода дальше
+                document.getElementById('btn-next-3').style.display = 'inline-block';
+            }, 300);
+        }
+
+        // --- Экран 4: Лотерея ---
+        const compliments = [
+            "Твой уровень обаяния сегодня пробил потолок! Так держать!",
+            "Ты заслуживаешь миллион комплиментов прямо сейчас!",
+            "Сегодня всё будет так, как захочешь ты! Пользуйся этим!"
+        ];
+        
+        compliments.sort(() => Math.random() - 0.5);
+        let hasFlipped = false;
+
+        function flipCard(cardElement, index) {
+            if (hasFlipped) return; 
+            hasFlipped = true;
+            
+            document.getElementById('card-back-' + index).innerText = compliments[index];
+            cardElement.classList.add('flipped');
+            
+            // Показываем кнопку "Повторить" с небольшой задержкой
+            setTimeout(() => {
+                document.getElementById('btn-restart').style.display = 'inline-flex';
+            }, 800);
+        }
+    </script>
+</body>
+</html>
